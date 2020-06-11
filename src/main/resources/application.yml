@@ -1,0 +1,36 @@
+custom.kafka:
+  bootstrap-servers: 10.1.203.51:9191,10.1.203.51:9192,10.1.203.51:9193
+  producer:
+    retries: 3  # 设置大于0的值，则客户端会将发送失败的记录重新发送
+    batch-size: 4096 # 每次批量发送消息的数量
+    buffer-memory: 40960
+    # 指定消息key和消息体的编解码方式 UTF-8
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    acks: all  #ack=all，所有可用副本都收到消息，Broker服务端才会返回消息保存成功。
+    compression-type: none  #较大的json格式数据，启用压缩，如果服务端未启用压缩，将得不偿失，请设在为一样的压缩算法
+    connections.max.idle.ms: 60000  # 如果设置该参数 =-1，会产生为“僵尸”连接。
+    # enable.idempotence 被设置成 true 后，Producer 自动升级成幂等性 Producer，其他所有的代码逻辑都不需要改变。
+    # Kafka 自动帮你做消息的重复去重。底层具体的原理很简单，就是经典的用空间去换时间的优化思路，即在 Broker 端多保存一些字段。
+    # 当 Producer 发送了具有相同字段值的消息后，Broker 能够自动知晓这些消息已经重复了，于是可以在后台默默地把它们“丢弃”掉。
+    enable.idempotence: true
+    linger.ms: 10 
+  consumer:
+    #如果为true，则消费者的偏移量将在后台定期提交，默认值为true
+    enable-auto-commit: false
+    #当Kafka中没有初始偏移量或者服务器上不再存在当前偏移量时该怎么办，默认值为latest，表示自动将偏移重置为最新的偏移量
+    #可选的值为latest, earliest, none
+    auto-offset-reset: earliest
+    #密钥的反序列化器类，实现类实现了接口org.apache.kafka.common.serialization.Deserializer
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    #值的反序列化器类，实现类实现了接口org.apache.kafka.common.serialization.Deserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    max-poll-records: 1 #批量拉取消息的数量
+    max-poll-interval-ms: 300000 #5分钟
+    session-timeout-ms: 10000
+    heartbeat-interval-ms: 2000
+    
+spring.redis:
+  host: 10.1.203.43
+  port: 6379
+  password: 
