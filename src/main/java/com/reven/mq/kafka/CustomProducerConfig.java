@@ -10,7 +10,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
 @Configuration
-public class ManualProducerConfig {
+public class CustomProducerConfig {
     @Value("${custom.kafka.bootstrap-servers}")
     private String bootstrapServers;
 

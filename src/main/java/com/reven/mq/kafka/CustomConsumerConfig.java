@@ -15,7 +15,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 
 @Configuration
 @EnableKafka
-public class ManualConsumerConfig {
+public class CustomConsumerConfig {
     @Value("${custom.kafka.bootstrap-servers}")
     private String bootstrapServers;
     @Value("${custom.kafka.consumer.key-deserializer}")
@@ -40,7 +40,7 @@ public class ManualConsumerConfig {
 
 
     @Bean
-    public KafkaListenerContainerFactory<?> manualKafkaListenerContainerFactory() {
+    public KafkaListenerContainerFactory<?> customKafkaListenerContainerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);

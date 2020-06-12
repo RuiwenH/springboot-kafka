@@ -27,13 +27,13 @@ public class MessageConsumer {
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
-    @KafkaListener(topics = "testTopic_repeat2", groupId = "test-group21", concurrency = "10", containerFactory = "manualKafkaListenerContainerFactory")
+    @KafkaListener(topics = "testTopic_repeat2", groupId = "test-group24", concurrency = "10", containerFactory = "customKafkaListenerContainerFactory")
     public void consume(ConsumerRecord<String, String> record, Consumer<String, String> consumer) throws Exception {
         LOGGER.info("消息处理开始，{}", record);
         // 解析消息
         Order order = parseMsg(record);
         // 消息的唯一标识——用于去重判断
-        String msgTestPrefix = "test-group21";
+        String msgTestPrefix = "test-group24";
         String msgId = msgTestPrefix + order.getOrderId();
         try {
             // 去重判断
@@ -62,7 +62,7 @@ public class MessageConsumer {
         if (failTimes >= 5) {
             // 忽略消息，提交位移
             LOGGER.error("消费连续错误5次，跳过该消息：{}", record);
-            failHandleMsgNotice(record);
+            failHandleMsgNotice(record,e);
             consumer.commitSync();
         } else {
             // 将位移信息指定为当前位移，为了sleep后再次消费
@@ -77,7 +77,7 @@ public class MessageConsumer {
 
             try {
                 // 暂停消费消费3分钟，注意避免引起Rebalance
-                Thread.sleep(180000);
+                Thread.sleep(1800);
             } catch (InterruptedException e1) {
             }
         }
@@ -96,15 +96,31 @@ public class MessageConsumer {
             return order;
         } catch (Exception e) {
             // 解析失败时，跳过消息，并邮件通知人工确认。
-            failHandleMsgNotice(record);
+            failHandleMsgNotice(record,e);
             throw e;
         }
     }
 
-    private void failHandleMsgNotice(ConsumerRecord<String, String> record) {
+    private void failHandleMsgNotice(ConsumerRecord<String, String> record, Exception e) {
         String subject = "Kafka消息队列，消费失败提醒";
-        String emailContent = record.toString();
+        String emailContent = record.toString()+getExceptionDetail(e);
         String mailTo = "";
         LOGGER.info("subject={},mailTo={},emailContent={}", subject, mailTo, emailContent);
     }
+    public static String getExceptionDetail(Exception e) {
+        StringBuffer bf = new StringBuffer();
+        bf.append("异常信息：");
+        bf.append(e.getMessage());
+        bf.append("<br/>");//页面换行
+        StackTraceElement[] stackTraces = e.getStackTrace();
+        int i=0;
+        for (StackTraceElement trace : stackTraces) {
+            i++;
+            bf.append(trace.toString()).append("<br/>");
+            if(i>100){//最多打印100行就可以了
+                break;
+            }
+        }
+        return bf.toString();
+    } 
 }

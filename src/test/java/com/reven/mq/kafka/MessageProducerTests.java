@@ -41,6 +41,7 @@ public class MessageProducerTests {
     
     @Test
     void sendOtherParttion() throws InterruptedException, ExecutionException {
+        // 用于消息分配到不同的分区
         String msgKey = "order_group_1";
         
         Order order = new Order();
@@ -49,7 +50,6 @@ public class MessageProducerTests {
         order.setAmount(new BigDecimal(1000.08));
         order.setCustomerName("正常消息");
         order.setOrderDate(new Date());
-        // 用于消息分配到不同的分区
         messageProducer.sendOrderMsg("testTopic_repeat3",order, msgKey);
         Order order2 = new Order();
         String orderId2 = "o_" + 4;
@@ -57,8 +57,25 @@ public class MessageProducerTests {
         order2.setAmount(new BigDecimal(1000.08));
         order2.setCustomerName("错误消息");
         order2.setOrderDate(new Date());
-        // 用于消息分配到不同的分区
         messageProducer.sendOrderMsg("testTopic_repeat3",order2, msgKey);
+    }
+    
+    @Test
+    void sendError() throws InterruptedException, ExecutionException {
+        Order order2 = new Order();
+        String orderId2 = "o_" + 4;
+        order2.setOrderId(orderId2);
+        order2.setAmount(new BigDecimal(1000.01));
+        order2.setCustomerName(buildBigString());
+        order2.setOrderDate(new Date());
+        messageProducer.sendOrderMsg("testTopic_repeat3",order2, "test");
+    }
+    private String buildBigString() {
+        StringBuffer sb=new StringBuffer();
+        for (int i = 0; i < 1000000; i++) {
+            sb.append(i+"我是很长很长的字符串。");
+        }
+        return sb.toString();
     }
 
 }
