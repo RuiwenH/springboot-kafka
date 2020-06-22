@@ -30,5 +30,11 @@ public class MessageProducer {
         SendResult<String, String> sendResult = producerKafkaTemplate.send(topic, msgKey, jsonMsg).get();
         log.info(sendResult.toString());
     }
+    
+    public void sendOrderMsg(String topic, String msg, String msgKey) throws InterruptedException, ExecutionException {
+        // 同步发送需要等待kafka服务器的响应吞吐相对较低
+        SendResult<String, String> sendResult = producerKafkaTemplate.send(topic, msgKey, msg).get();
+        log.info(sendResult.toString());
+    }
 
 }

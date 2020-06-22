@@ -19,11 +19,12 @@ import com.reven.bo.Order;
         MessageConsumer.class }))
 public class MessageProducerTests {
 
+    private static final String TEST_TOPIC = "testTopic_repeat_003";
     @Autowired
     private MessageProducer messageProducer;
 
     /**   
-     * @Title: sendSameMsg   
+     * @Title: 重复消息   
      */
     @Test
     void sendSameMsg() throws InterruptedException, ExecutionException {
@@ -35,8 +36,8 @@ public class MessageProducerTests {
         order.setOrderDate(new Date());
         // 用于消息分配到不同的分区
         String msgKey = "order_group_6";
-        messageProducer.sendOrderMsg("testTopic_repeat3",order, msgKey);
-        messageProducer.sendOrderMsg("testTopic_repeat3",order, msgKey);
+        messageProducer.sendOrderMsg(TEST_TOPIC,order, msgKey);
+        messageProducer.sendOrderMsg(TEST_TOPIC,order, msgKey);
     }
     
     @Test
@@ -50,14 +51,15 @@ public class MessageProducerTests {
         order.setAmount(new BigDecimal(1000.08));
         order.setCustomerName("正常消息");
         order.setOrderDate(new Date());
-        messageProducer.sendOrderMsg("testTopic_repeat3",order, msgKey);
+        messageProducer.sendOrderMsg(TEST_TOPIC,order, msgKey);
+        
         Order order2 = new Order();
         String orderId2 = "o_" + 4;
         order2.setOrderId(orderId2);
         order2.setAmount(new BigDecimal(1000.08));
         order2.setCustomerName("错误消息");
         order2.setOrderDate(new Date());
-        messageProducer.sendOrderMsg("testTopic_repeat3",order2, msgKey);
+        messageProducer.sendOrderMsg(TEST_TOPIC,order2, msgKey);
     }
     
     @Test
@@ -68,7 +70,7 @@ public class MessageProducerTests {
         order2.setAmount(new BigDecimal(1000.01));
         order2.setCustomerName(buildBigString());
         order2.setOrderDate(new Date());
-        messageProducer.sendOrderMsg("testTopic_repeat3",order2, "test");
+        messageProducer.sendOrderMsg(TEST_TOPIC,order2, "test");
     }
     private String buildBigString() {
         StringBuffer sb=new StringBuffer();
@@ -76,6 +78,25 @@ public class MessageProducerTests {
             sb.append(i+"我是很长很长的字符串。");
         }
         return sb.toString();
+    }
+    
+    /**   
+     * @Title: sendSameMsg   
+     */
+    @Test
+    void sendIllegalMsg() throws InterruptedException, ExecutionException {
+        String msgKey = "order_group_6";
+        messageProducer.sendOrderMsg(TEST_TOPIC,"我是非标准的json数据", msgKey);
+    }
+    
+    /**   
+     * @Title: sendSameMsg   
+     */
+    @Test
+    void sendEmptyMsg() throws InterruptedException, ExecutionException {
+        Order order2 = new Order();
+        String msgKey = "order_group_6";
+        messageProducer.sendOrderMsg(TEST_TOPIC,order2, msgKey);
     }
 
 }
